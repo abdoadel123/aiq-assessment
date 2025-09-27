@@ -3,3 +3,5 @@
 **/eGRID2021_data.xlsx
 **/.env
 **/.DS_Store
+**/*.pdf
+**/*.csv
