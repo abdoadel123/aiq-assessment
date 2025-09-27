@@ -1,0 +1,9 @@
+node_modules/
+build/
+dist/
+coverage/
+.git/
+.vscode/
+.idea/
+.history/
+.DS_Store

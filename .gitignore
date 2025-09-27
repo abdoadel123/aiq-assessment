@@ -1,0 +1,4 @@
+**/node_modules
+**/dist
+**/eGRID2021_data.xlsx
+**/.env
