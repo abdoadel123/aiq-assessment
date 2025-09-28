@@ -21,7 +21,7 @@ export class ValidationError extends AppError {
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string = 'Resource not found') {
+  constructor(message: string = "Resource not found") {
     super(message, 404);
   }
 }
@@ -33,19 +33,7 @@ export class BadRequestError extends AppError {
 }
 
 export class InternalServerError extends AppError {
-  constructor(message: string = 'Internal server error') {
+  constructor(message: string = "Internal server error") {
     super(message, 500);
-  }
-}
-
-export class FileNotFoundError extends AppError {
-  constructor(fileName: string) {
-    super(`File not found: ${fileName}`, 404);
-  }
-}
-
-export class InvalidFileFormatError extends AppError {
-  constructor(message: string) {
-    super(message, 400);
   }
 }

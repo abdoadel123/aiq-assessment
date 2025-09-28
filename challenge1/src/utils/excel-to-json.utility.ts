@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as XLSX from "xlsx";
-import { FileNotFoundError } from "../errors/custom-errors";
+import { NotFoundError } from "../errors/custom-errors";
 import { IPowerPlant } from "../types";
 
 export async function convertExcelToJson(
@@ -8,7 +8,7 @@ export async function convertExcelToJson(
   sheetName = "PLNT21"
 ): Promise<IPowerPlant[]> {
   if (!fs.existsSync(excelPath)) {
-    throw new FileNotFoundError(excelPath);
+    throw new NotFoundError("File Not found");
   }
 
   console.log("Reading Excel file:", excelPath);
