@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import logger from "../utils/logger";
 
 export async function connectDatabase(): Promise<void> {
   const username = process.env.MONGO_USERNAME;
@@ -11,22 +12,22 @@ export async function connectDatabase(): Promise<void> {
 
   try {
     await mongoose.connect(uri);
-    console.log("✅ MongoDB connected successfully");
+    logger.info("✅ MongoDB connected successfully");
 
     mongoose.connection.on("error", (err) => {
-      console.error("MongoDB connection error:", err);
+      logger.error(`MongoDB connection error: ${err}`);
     });
 
     mongoose.connection.on("disconnected", () => {
-      console.log("MongoDB disconnected");
+      logger.warn("MongoDB disconnected");
     });
   } catch (error) {
-    console.error("Failed to connect to MongoDB:", error);
+    logger.error(`Failed to connect to MongoDB: ${error}`);
     process.exit(1);
   }
 }
 
 export async function disconnectDatabase(): Promise<void> {
   await mongoose.disconnect();
-  console.log("MongoDB connection closed");
+  logger.info("MongoDB connection closed");
 }

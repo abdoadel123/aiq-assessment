@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { UpdatePlantsDto } from "../dtos/update-plants.dto";
-import { BadRequestError } from "../errors/custom-errors";
-import plantsService from "../services/plants.service";
+import { UpdatePlantsDto } from "../dtos";
+import { BadRequestError } from "../errors";
+import { plantsService } from "../services";
 
 class PlantsController {
   public async getTopPlants(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -38,4 +38,4 @@ class PlantsController {
   }
 }
 
-export default new PlantsController();
+export const plantsController = new PlantsController();

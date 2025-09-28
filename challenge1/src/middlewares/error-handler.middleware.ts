@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { AppError, ValidationError } from "../errors/custom-errors";
+import { AppError, ValidationError } from "../errors";
 import { IResponse } from "../types";
+import logger from "../utils/logger";
 
 export const errorHandler = (
   err: Error | AppError,
@@ -17,17 +18,20 @@ export const errorHandler = (
 
   const appError = error as AppError;
 
-  console.error(`Error on ${req.method} ${req.path}`, {
-    statusCode: appError.statusCode,
-    message: appError.message,
-    isOperational: appError.isOperational,
-    body: req.body,
-    params: req.params,
-    query: req.query
-  });
+  logger.error(
+    `Error on ${req.method} ${req.path} - Status: ${appError.statusCode} - Message: ${appError.message}`,
+    {
+      statusCode: appError.statusCode,
+      message: appError.message,
+      isOperational: appError.isOperational,
+      body: req.body,
+      params: req.params,
+      query: req.query
+    }
+  );
 
   if (!appError.isOperational) {
-    console.error("UNEXPECTED ERROR:", error);
+    logger.error(`UNEXPECTED ERROR: ${error}`);
   }
 
   const response: IResponse<null> = {

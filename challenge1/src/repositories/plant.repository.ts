@@ -1,23 +1,50 @@
-import { IPlant, Plant } from "../entities/plant.entity";
-import { IPowerPlant } from "../types";
+import { IPlant, Plant } from "../entities";
+import { IPowerPlant } from "../interfaces";
+import logger from "../utils/logger";
 
 export class PlantRepository {
-  async bulkInsert(plants: IPowerPlant[], batchSize = 1000): Promise<void> {
+  async bulkUpsert(plants: IPowerPlant[], batchSize = 1000): Promise<void> {
     try {
-      await Plant.deleteMany({});
-      console.log("Cleared existing plant data");
+      let totalUpserted = 0;
+      let totalModified = 0;
 
       for (let i = 0; i < plants.length; i += batchSize) {
         const batch = plants.slice(i, i + batchSize);
 
-        await Plant.insertMany(batch, { ordered: false });
+        const bulkOps = batch.map((plant) => ({
+          updateOne: {
+            filter: { orispl: plant.orispl },
+            update: {
+              $set: {
+                orispl: plant.orispl,
+                name: plant.name,
+                state: plant.state,
+                latitude: plant.latitude,
+                longitude: plant.longitude,
+                annualNetGeneration: plant.annualNetGeneration
+              }
+            },
+            upsert: true
+          }
+        }));
 
-        console.log(`Inserted batch ${Math.floor(i / batchSize) + 1}: ${batch.length} plants`);
+        const result = await Plant.bulkWrite(bulkOps, { ordered: false });
+
+        totalUpserted += result.upsertedCount;
+        totalModified += result.modifiedCount;
+
+        logger.info(
+          `Processed batch ${Math.floor(i / batchSize) + 1}: ${batch.length} plants (${
+            result.upsertedCount
+          } inserted, ${result.modifiedCount} updated)`
+        );
       }
 
-      console.log(`Total plants inserted: ${plants.length}`);
+      logger.info(
+        `Total plants processed: ${plants.length} (${totalUpserted} inserted, ${totalModified} updated)`
+      );
     } catch (error) {
-      console.error("Error during bulk insert:", error);
+      logger.error(`Error during bulk upsert: ${error}`);
       throw error;
     }
   }

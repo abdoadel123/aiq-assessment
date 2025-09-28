@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { validate, ValidationError as ClassValidatorError } from 'class-validator';
-import { plainToInstance } from 'class-transformer';
-import { ValidationError } from '../errors/custom-errors';
+import { plainToInstance } from "class-transformer";
+import { ValidationError as ClassValidatorError, validate } from "class-validator";
+import { NextFunction, Request, Response } from "express";
+import { ValidationError } from "../errors";
 
 export function validateDto(dtoClass: any) {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -11,7 +11,7 @@ export function validateDto(dtoClass: any) {
 
       if (errors.length > 0) {
         const errorMessages = formatValidationErrors(errors);
-        throw new ValidationError('Validation failed', errorMessages);
+        throw new ValidationError("Validation failed", errorMessages);
       }
 
       req.body = dto;

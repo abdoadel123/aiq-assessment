@@ -1,7 +1,7 @@
 import { Document, Schema, model } from "mongoose";
 
 export interface IPlant extends Document {
-  id: number;
+  orispl: number;
   name: string;
   state: string;
   latitude: number;
@@ -11,9 +11,10 @@ export interface IPlant extends Document {
 
 const PlantSchema = new Schema<IPlant>(
   {
-    id: {
+    orispl: {
       type: Number,
-      required: true
+      required: true,
+      unique: true
     },
     name: {
       type: String,

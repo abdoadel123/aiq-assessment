@@ -2,9 +2,10 @@ import cors from "cors";
 import "dotenv/config";
 import express from "express";
 import "reflect-metadata";
-import { connectDatabase } from "./config/database";
-import { errorHandler, notFoundHandler } from "./middlewares/error-handler.middleware";
-import plantsRouter from "./routers/plants.router";
+import { connectDatabase } from "./config";
+import { errorHandler, notFoundHandler } from "./middlewares";
+import { appRouter } from "./routers";
+import logger from "./utils/logger";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,18 +13,18 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use("/api", plantsRouter);
+app.use(appRouter);
 
 app.use(notFoundHandler);
 
 app.use(errorHandler);
 
 process.on("unhandledRejection", (reason: Error | any) => {
-  console.error("Unhandled Rejection:", reason);
+  logger.error(`Unhandled Rejection: ${reason}`);
 });
 
 process.on("uncaughtException", (error: Error) => {
-  console.error("Uncaught Exception:", error);
+  logger.error(`Uncaught Exception: ${error}`);
   process.exit(1);
 });
 
@@ -32,13 +33,11 @@ async function startServer() {
     await connectDatabase();
 
     app.listen(PORT, () => {
-      console.info(`🚀 Server running on http://localhost:${PORT}`);
-      console.info("API endpoints:", {
-        endpoints: ["POST /api/v1/plants/update", "GET /api/v1/plants"]
-      });
+      logger.info(`🚀 Server running on http://localhost:${PORT}`);
+      logger.info("API endpoints: POST /api/v1/plants/update, GET /api/v1/plants");
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    logger.error(`Failed to start server: ${error}`);
     process.exit(1);
   }
 }

@@ -1,10 +1,4 @@
-export interface IPowerPlant {
-  id: number;
-  name: string;
-  state: string;
-  annualNetGeneration: number;
-  percentage?: number;
-}
+import { IPowerPlant } from "../interfaces";
 
 export interface IPlantsAndTotals {
   plants: IPowerPlant[];
