@@ -10,7 +10,7 @@ COPY tsconfig.json ./
 
 COPY src ./src
 
-COPY eGRID*.xlsx ./
+COPY *.xlsx ./
 
 RUN npm run build
 

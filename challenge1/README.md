@@ -2,7 +2,15 @@
 
 ## Quick Start
 
-### 1. Start with Docker
+### 1. Download Data
+
+Download the Data File (Excel format) from the EPA website:
+
+Visit https://www.epa.gov/egrid/download-data and download eGRID2021 or recent data sheet (xlsx)
+
+Place the downloaded file in the challenge1 directory
+
+### 2. Start with Docker
 
 ```bash
 docker-compose up -d
@@ -10,7 +18,7 @@ docker-compose up -d
 
 Wait 5-10 seconds for MongoDB to initialize.
 
-### 2. Import Data
+### 3. Import Data
 
 ```bash
 curl -X POST http://localhost:3000/api/v1/plants/update \
@@ -18,7 +26,7 @@ curl -X POST http://localhost:3000/api/v1/plants/update \
   -d '{"excelPath": "./eGRID2021_data.xlsx", "sheetName": "PLNT21"}'
 ```
 
-### 3. Test API
+### 4. Test API
 
 #### Get Top 10 Plants
 
