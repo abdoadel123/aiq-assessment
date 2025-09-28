@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import { UpdatePlantsDto } from "../dtos/update-plants.dto";
 import { BadRequestError } from "../errors/custom-errors";
 import plantsService from "../services/plants.service";
-import { IPowerPlant, IResponse } from "../types";
 
 class PlantsController {
   public async getTopPlants(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -17,7 +16,7 @@ class PlantsController {
       res.json({
         success: true,
         data: plants
-      } as IResponse<IPowerPlant[]>);
+      });
     } catch (error) {
       next(error);
     }

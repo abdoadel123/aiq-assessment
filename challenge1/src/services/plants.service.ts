@@ -1,5 +1,4 @@
 import { plantRepository } from "../repositories/plant.repository";
-import { IPowerPlant } from "../types";
 import { convertExcelToJson } from "../utils/excel-to-json.utility";
 
 class PlantsService {
@@ -9,19 +8,24 @@ class PlantsService {
     console.log("Data updated from Excel file and saved to MongoDB");
   }
 
-  async getTopPlants(limit = 100, state?: string): Promise<IPowerPlant[]> {
+  async getTopPlants(limit = 100, state?: string) {
     const plants = await plantRepository.findTop(limit, state);
     const { total } = await plantRepository.aggregateTotalGeneration(state);
 
-    return plants.map((plant) => {
+    const plantsWithPercentage = plants.map((plant) => {
       return {
         id: plant.id,
         name: plant.name,
         state: plant.state,
         annualNetGeneration: plant.annualNetGeneration,
-        percentage: (plant.annualNetGeneration / total) * 100
+        percentage: Number(((plant.annualNetGeneration / total) * 100).toFixed(2))
       };
     });
+
+    return {
+      total,
+      plants: plantsWithPercentage
+    };
   }
 }
 
