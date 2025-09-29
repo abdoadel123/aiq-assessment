@@ -3,7 +3,7 @@ import numpy as np
 from typing import List, Dict
 from sqlalchemy.orm import Session
 import logging
-from src.database.models import ImageFrame
+from src.models import ImageFrame
 from src.services.image_processor import ImageProcessor
 
 logger = logging.getLogger(__name__)

@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.database.connection import Base
-from src.database.models import ImageFrame
+from src.models import ImageFrame
 from src.config import settings
 
 config = context.config

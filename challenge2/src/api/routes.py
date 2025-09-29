@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Body, BackgroundTasks
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import Optional
 from src.database import get_db
-from src.database.models import ImageFrame
+from src.models import ImageFrame
 from src.services.data_loader import DataLoader
 from src.services.colormap_processor import ColorMapProcessor
 from src.utils.colormap import ColormapHandler
 from . import schemas
 import logging
-import asyncio
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/v1", tags=["images"])

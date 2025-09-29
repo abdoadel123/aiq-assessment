@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, Float, JSON, DateTime, Index, String
 from sqlalchemy.sql import func
-from .connection import Base
+from src.database.connection import Base
 
 
 class ImageFrame(Base):

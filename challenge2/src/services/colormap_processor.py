@@ -3,7 +3,7 @@ import logging
 from typing import Dict
 from sqlalchemy import func
 from datetime import datetime, timezone
-from src.database.models import ImageFrame
+from src.models import ImageFrame
 from src.utils.colormap import ColormapHandler
 from src.database import SessionLocal
 
