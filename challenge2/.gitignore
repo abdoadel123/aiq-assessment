@@ -12,3 +12,4 @@ venv.bak/
 htmlcov/
 *.logs
 postgres_data/
+!data.csv
