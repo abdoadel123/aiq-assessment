@@ -23,3 +23,26 @@ A REST API service for managing and analyzing power plant data from the EPA's eG
 - Winston for logging
 
 For detailed setup and usage instructions, see [challenge1/README.md](./challenge1/README.md)
+
+### Challenge 2: Image Processing API
+A REST API service for processing and serving image data with depth-based queries and colormap visualization.
+
+**Location:** `./challenge2`
+
+**Features:**
+- CSV data import with image resizing capabilities
+- PostgreSQL data persistence with Alembic migrations
+- RESTful API endpoints for querying image frames
+- Depth-based filtering with pagination
+- Batch colormap processing with status tracking
+- Multiple colormap support (viridis, plasma, jet, etc.)
+
+**Tech Stack:**
+- Python with FastAPI
+- PostgreSQL with SQLAlchemy ORM
+- Alembic for database migrations
+- OpenCV for image processing
+- Matplotlib for colormap application
+- Docker Compose for containerization
+
+For detailed setup and usage instructions, see [challenge2/README.md](./challenge2/README.md)

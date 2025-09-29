@@ -1,8 +1,4 @@
-**/node_modules
-**/dist
-**/*.xlsx
-**/.env
-**/.DS_Store
 **/*.pdf
 **/*.csv
-**/logs
+**/.DS_Store
+**/.env
