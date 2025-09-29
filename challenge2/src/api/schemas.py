@@ -4,7 +4,6 @@ from datetime import datetime
 
 
 class ResizeRequest(BaseModel):
-    csv_path: str = Field(default="/app/data.csv", description="Path to the CSV file")
     target_width: int = Field(default=150, description="Target width for resizing")
 
 

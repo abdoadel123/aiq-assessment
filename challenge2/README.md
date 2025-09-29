@@ -15,7 +15,7 @@ Wait 10-15 seconds for PostgreSQL to initialize and migrations to run automatica
 ```bash
 curl -X POST http://localhost:8000/api/v1/resize \
   -H "Content-Type: application/json" \
-  -d '{"csv_path": "/app/data.csv", "target_width": 150}'
+  -d '{"target_width": 150}'
 ```
 
 ### 3. Test API
@@ -72,7 +72,7 @@ curl http://localhost:8000/api/v1/colormaps
 
 | Method | Endpoint                    | Description                              | Parameters                                    |
 | ------ | --------------------------- | ---------------------------------------- | --------------------------------------------- |
-| POST   | `/api/v1/resize`            | Load CSV data, resize and save to DB    | `csv_path`, `target_width`                    |
+| POST   | `/api/v1/resize`            | Load CSV data, resize and save to DB    | `target_width`                                |
 | GET    | `/api/v1/frames`            | Get image frames with pagination         | `depth_min`, `depth_max`, `page`, `per_page`, `coloredmap` |
 | POST   | `/api/v1/colormap/apply`    | Apply colormap to all frames (batch)    | `colormap`, `batch_size`                      |
 | GET    | `/api/v1/colormap/status`   | Get colormap processing status           | -                                             |

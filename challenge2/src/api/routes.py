@@ -22,7 +22,7 @@ async def resize_images(
     try:
         data_loader = DataLoader(db)
         frames_processed = data_loader.load_resize_and_save(
-            csv_path=request.csv_path,
+            csv_path="data.csv",
             target_width=request.target_width
         )
 
