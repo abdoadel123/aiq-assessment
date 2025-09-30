@@ -1,32 +1,58 @@
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 import numpy as np
-from typing import List
+from matplotlib import cm
+from typing import List, Union, Dict
 
 
 class ColormapHandler:
-    AVAILABLE_COLORMAPS = [
+  
+    AVAILABLE_COLORMAPS: List[str] = [
         "viridis", "plasma", "inferno", "magma",
         "jet", "hot", "cool", "spring", "summer",
         "autumn", "winter", "gray", "bone"
     ]
 
+    _COLORMAP_CACHE: Dict[str, cm.ScalarMappable] = {}
+
     @classmethod
-    def apply_colormap(cls, grayscale_values: List[int], colormap_name: str = "viridis") -> List[List[int]]:
-        if colormap_name not in cls.AVAILABLE_COLORMAPS:
-            raise ValueError(f"Invalid colormap: {colormap_name}")
+    def get_colormap(cls, name: str):
+        """
+        Retrieve a colormap from cache, or create and cache it if not available.
+        """
+        if name not in cls._COLORMAP_CACHE:
+            if name not in cls.AVAILABLE_COLORMAPS:
+                raise ValueError(f"Invalid colormap: {name}")
+            cls._COLORMAP_CACHE[name] = cm.get_cmap(name)
+        return cls._COLORMAP_CACHE[name]
 
-        cmap = cm.get_cmap(colormap_name)
+    @classmethod
+    def apply_colormap(
+        cls,
+        grayscale_values: Union[List[int], np.ndarray],
+        colormap_name: str = "viridis"
+    ) -> List[List[int]]:
+        """
+        Map grayscale values (0–255) to RGB values using a given colormap.
 
-        normalized = np.array(grayscale_values) / 255.0
+        Args:
+            grayscale_values: Sequence of integers [0–255].
+            colormap_name: Name of the colormap to use.
 
-        rgb_values = []
-        for value in normalized:
-            rgba = cmap(value)
-            rgb = [int(rgba[i] * 255) for i in range(3)]
-            rgb_values.append(rgb)
+        Returns:
+            List of [R, G, B] values.
+        """
+        cmap = cls.get_colormap(colormap_name)
 
-        return rgb_values
+        # Convert to numpy array
+        grayscale_values = np.asarray(grayscale_values, dtype=np.uint8)
+
+        # Normalize to [0, 1] for colormap
+        normalized = grayscale_values / 255.0
+
+        # Apply colormap (vectorized)
+        rgba = cmap(normalized)[:, :3]  # Drop alpha channel
+        rgb = (rgba * 255).astype(np.uint8)
+
+        return rgb.tolist()
 
     @classmethod
     def is_valid_colormap(cls, colormap_name: str) -> bool:

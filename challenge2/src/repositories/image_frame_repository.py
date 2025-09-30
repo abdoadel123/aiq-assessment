@@ -119,3 +119,7 @@ class ImageFrameRepository(BaseRepository[ImageFrame]):
             depth=depth,
             pixels=pixels
         )
+
+    def bulk_insert(self, mappings: List[dict]) -> None:
+        self.db.bulk_insert_mappings(ImageFrame, mappings)
+        self.db.commit()

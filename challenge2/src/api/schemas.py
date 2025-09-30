@@ -1,6 +1,29 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
+from enum import Enum
+
+
+class ColormapEnum(str, Enum):
+    viridis = "viridis"
+    plasma = "plasma"
+    inferno = "inferno"
+    magma = "magma"
+    cividis = "cividis"
+    turbo = "turbo"
+    jet = "jet"
+    hot = "hot"
+    cool = "cool"
+    spring = "spring"
+    summer = "summer"
+    autumn = "autumn"
+    winter = "winter"
+    bone = "bone"
+    copper = "copper"
+    gray = "gray"
+    rainbow = "rainbow"
+    ocean = "ocean"
+    terrain = "terrain"
 
 
 class ResizeRequest(BaseModel):
@@ -39,7 +62,7 @@ class FramesQueryResponse(BaseModel):
 
 class ColorMapRequest(BaseModel):
     image_id: int = Field(description="ID of the image to apply colormap to")
-    colormap: str = Field(default="viridis", description="Name of the colormap to apply")
+    colormap: ColormapEnum = Field(default=ColormapEnum.viridis, description="Name of the colormap to apply")
     batch_size: int = Field(default=100, description="Batch size for processing")
 
 

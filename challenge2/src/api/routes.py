@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from typing import Optional
 from src.services import DataLoader, ColorMapProcessor, FrameService
-from src.utils.colormap import ColormapHandler
 from . import schemas
 import logging
 
@@ -81,7 +80,7 @@ async def get_frames(
                     id=frame.id,
                     image_id=frame.image_id,
                     depth=frame.depth,
-                    pixels=frame.pixels if frame.pixels is not None else [],
+                    pixels=frame.pixels,
                     color_map_pixels=[],
                     colormap_name=frame.colormap_name,
                     created_at=frame.created_at,
@@ -112,16 +111,16 @@ async def apply_colormap(
     try:
         result = colormap_service.apply_colormap_to_image(
             request.image_id,
-            request.colormap,
+            request.colormap.value,
             request.batch_size
         )
 
         return schemas.ColorMapResponse(
-            message=f"Successfully applied '{request.colormap}' colormap",
+            message=f"Successfully applied '{request.colormap.value}' colormap",
             image_id=request.image_id,
             processed=result['processed'],
             total=result['total'],
-            colormap_applied=request.colormap
+            colormap_applied=request.colormap.value
         )
 
     except HTTPException:
@@ -131,8 +130,3 @@ async def apply_colormap(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/colormaps")
-async def get_available_colormaps():
-    return {
-        "colormaps": ColormapHandler.AVAILABLE_COLORMAPS
-    }

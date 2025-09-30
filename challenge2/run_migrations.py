@@ -19,7 +19,6 @@ def wait_for_db(max_retries=30):
             return True
         except OperationalError:
             print(f"Database not ready yet. Retry {i+1}/{max_retries}")
-            time.sleep(2)
 
     print("Failed to connect to database")
     return False

@@ -24,12 +24,6 @@ class ColorMapProcessor:
         colormap_name: str,
         batch_size: int = 100
     ) -> Dict:
-        if not ColormapHandler.is_valid_colormap(colormap_name):
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid colormap: {colormap_name}. Available: {ColormapHandler.AVAILABLE_COLORMAPS}"
-            )
-
         image = self.image_repository.get_by_id(image_id)
         if not image:
             raise HTTPException(status_code=404, detail=f"Image {image_id} not found")
