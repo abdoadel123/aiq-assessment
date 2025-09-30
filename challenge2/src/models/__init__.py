@@ -1,3 +1,4 @@
-from .models import ImageFrame
+from .image import Image
+from .image_frame import ImageFrame
 
-__all__ = ["ImageFrame"]
+__all__ = ["Image", "ImageFrame"]

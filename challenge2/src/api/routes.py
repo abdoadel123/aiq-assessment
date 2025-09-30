@@ -1,10 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Body, BackgroundTasks
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from typing import Optional
-from src.database import get_db
-from src.models import ImageFrame
-from src.services.data_loader import DataLoader
-from src.services.colormap_processor import ColorMapProcessor
+from src.services import DataLoader, ColorMapProcessor, FrameService
 from src.utils.colormap import ColormapHandler
 from . import schemas
 import logging
@@ -16,17 +12,17 @@ router = APIRouter(prefix="/api/v1", tags=["images"])
 @router.post("/resize", response_model=schemas.ResizeResponse)
 async def resize_images(
     request: schemas.ResizeRequest = Body(...),
-    db: Session = Depends(get_db)
+    data_loader: DataLoader = Depends()
 ):
     try:
-        data_loader = DataLoader(db)
-        frames_processed = data_loader.load_resize_and_save(
+        image_id, frames_processed = data_loader.load_resize_and_save(
             csv_path="data.csv",
             target_width=request.target_width
         )
 
         return schemas.ResizeResponse(
             message=f"Successfully processed and resized {frames_processed} frames",
+            image_id=image_id,
             frames_processed=frames_processed,
             target_width=request.target_width
         )
@@ -37,40 +33,23 @@ async def resize_images(
 
 @router.get("/frames", response_model=schemas.FramesQueryResponse)
 async def get_frames(
+    image_id: int = Query(..., description="Image ID"),
     depth_min: Optional[float] = Query(None, description="Minimum depth value"),
     depth_max: Optional[float] = Query(None, description="Maximum depth value"),
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(100, ge=1, le=1000, description="Items per page (max 1000)"),
     coloredmap: Optional[bool] = Query(None, description="Return colormap pixels (true) or grayscale pixels (false)"),
-    db: Session = Depends(get_db)
+    frame_service: FrameService = Depends()
 ):
     try:
-        if coloredmap is True:
-            query = db.query(
-                ImageFrame.id,
-                ImageFrame.depth,
-                ImageFrame.color_map_pixels,
-                ImageFrame.colormap_name,
-                ImageFrame.created_at,
-                ImageFrame.colormap_applied_at
-            )
-        else:
-            query = db.query(
-                ImageFrame.id,
-                ImageFrame.depth,
-                ImageFrame.pixels,
-                ImageFrame.colormap_name,
-                ImageFrame.created_at,
-                ImageFrame.colormap_applied_at
-            )
-
-        if depth_min is not None:
-            query = query.filter(ImageFrame.depth >= depth_min)
-        if depth_max is not None:
-            query = query.filter(ImageFrame.depth <= depth_max)
-
-        total = query.count()
-        logger.info(f"Found {total} frames matching filters: depth_min={depth_min}, depth_max={depth_max}, coloredmap={coloredmap}")
+        frames, total, total_pages = frame_service.get_frames_with_filters(
+            image_id=image_id,
+            depth_min=depth_min,
+            depth_max=depth_max,
+            page=page,
+            per_page=per_page,
+            coloredmap=coloredmap
+        )
 
         if total == 0:
             return schemas.FramesQueryResponse(
@@ -82,17 +61,12 @@ async def get_frames(
                 total_pages=0
             )
 
-        total_pages = (total + per_page - 1) // per_page
-        offset = (page - 1) * per_page
-
-        frames = query.order_by(ImageFrame.depth).offset(offset).limit(per_page).all()
-        logger.info(f"Retrieved {len(frames)} frames for page {page}")
-
         frame_responses = []
         if coloredmap is True:
             frame_responses = [
                 schemas.FrameResponse(
                     id=frame.id,
+                    image_id=frame.image_id,
                     depth=frame.depth,
                     pixels=[],
                     color_map_pixels=frame.color_map_pixels if frame.color_map_pixels is not None else [],
@@ -105,6 +79,7 @@ async def get_frames(
             frame_responses = [
                 schemas.FrameResponse(
                     id=frame.id,
+                    image_id=frame.image_id,
                     depth=frame.depth,
                     pixels=frame.pixels if frame.pixels is not None else [],
                     color_map_pixels=[],
@@ -122,6 +97,8 @@ async def get_frames(
             per_page=per_page,
             total_pages=total_pages
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in get_frames endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -130,45 +107,21 @@ async def get_frames(
 @router.post("/colormap/apply", response_model=schemas.ColorMapResponse)
 async def apply_colormap(
     request: schemas.ColorMapRequest = Body(...),
-    background_tasks: BackgroundTasks = BackgroundTasks(),
-    db: Session = Depends(get_db)
+    colormap_service: ColorMapProcessor = Depends()
 ):
     try:
-        # Validate colormap
-        if not ColormapHandler.is_valid_colormap(request.colormap):
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid colormap: {request.colormap}. Available: {ColormapHandler.AVAILABLE_COLORMAPS}"
-            )
-
-        # Check if processing is already in progress
-        status = ColorMapProcessor.get_status()
-        if status['status'] == 'processing':
-            raise HTTPException(
-                status_code=409,
-                detail=f"Colormap processing already in progress. Current: {status['processed']}/{status['total']}"
-            )
-
-        # Get total frame count
-        total_frames = db.query(ImageFrame).count()
-        if total_frames == 0:
-            raise HTTPException(
-                status_code=404,
-                detail="No frames found in database. Please load data first."
-            )
-
-        # Start background processing
-        background_tasks.add_task(
-            ColorMapProcessor.apply_colormap_batch,
+        result = colormap_service.apply_colormap_to_image(
+            request.image_id,
             request.colormap,
             request.batch_size
         )
 
         return schemas.ColorMapResponse(
-            message=f"Started applying '{request.colormap}' colormap to {total_frames} frames",
-            total_frames=total_frames,
-            colormap_applied=request.colormap,
-            processing_status="started"
+            message=f"Successfully applied '{request.colormap}' colormap",
+            image_id=request.image_id,
+            processed=result['processed'],
+            total=result['total'],
+            colormap_applied=request.colormap
         )
 
     except HTTPException:
@@ -176,18 +129,6 @@ async def apply_colormap(
     except Exception as e:
         logger.error(f"Error in apply_colormap endpoint: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/colormap/status", response_model=schemas.ColorMapProgress)
-async def get_colormap_status():
-    status = ColorMapProcessor.get_status()
-    return schemas.ColorMapProgress(
-        processed=status['processed'],
-        total=status['total'],
-        status=status['status'],
-        current_batch=status['current_batch'],
-        total_batches=status['total_batches']
-    )
 
 
 @router.get("/colormaps")
