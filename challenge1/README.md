@@ -2,6 +2,22 @@
 
 ## Quick Start
 
+## Environment Configuration
+
+Create a `.env` file in the project root:
+
+```env
+# MongoDB Configuration
+MONGO_USERNAME=admin
+MONGO_PASSWORD=password123
+MONGO_DB_NAME=powerplants
+MONGO_HOST=localhost
+MONGO_PORT=27017
+
+# Application Configuration
+PORT=3000
+```
+
 ### 1. Download Data
 
 Download the Data File (Excel format) from the EPA website:
